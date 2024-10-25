@@ -19,13 +19,7 @@ public:
 
 void header() {
     cout << "\n\n\t\t====================LIBRARY MANAGEMENT SYSTEM====================\n";
-    cout << "\n\n\t\t1. Insert New Record";
-    cout << "\n\n\t\t2. Search Record";
-    cout << "\n\n\t\t3. Update Record";
-    cout << "\n\n\t\t4. Delete Record";
-    cout << "\n\n\t\t5. Show all Record";
-    cout << "\n\n\t\t6. Exit";
-    cout << "\n\n\t\tEnter Your Choice: ";
+   
 }
 
 void LibraryManagementSystem::menu() {
@@ -43,13 +37,13 @@ void LibraryManagementSystem::menu() {
             case 2:
                 head = NULL;
                 // loadData();
-                // searchRecord();
+                search();
                 break;
 
             case 3:
                 head = NULL;
                 // loadData();
-                // updateRecord();
+                update();
                 break;
 
             case 4:
@@ -59,7 +53,7 @@ void LibraryManagementSystem::menu() {
                 break;
 
             case 5:
-                // sort();
+                sortBooks();
                 // head = NULL;
                 // loadData();
                 // showRecord();
