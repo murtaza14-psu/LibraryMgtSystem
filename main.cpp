@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include<ctime>
 
 using namespace std;
 
@@ -11,8 +12,12 @@ private:
         string author, title, publisher;
         Node *next_add;
     };
-public:
+
+    unordered_map<int, pair<string, time_t>> issuedBooks;  // Maps book ID to customer ID and return date
     Node *head = NULL;
+    int nextBookId = 1;  // Tracks the next unique book ID
+
+public:
     void menu();
     void insert();
     void search();
@@ -20,12 +25,90 @@ public:
     void deleteBook();
     void sortBooks();
     void showBooks();
+    void issueBook();
+    void showIssuedBooks();  // Function to display issued books
 
 };
-
 void header() {
     cout << "\n\n\t\t====================LIBRARY MANAGEMENT SYSTEM====================\n";
    
+}
+
+
+void LibraryManagementSystem::issueBook() {
+    header();
+    if (head == NULL) {
+        cout << "\n\nNo records found!";
+        return;
+    }
+
+    int bookId;
+    string customerId;
+    int days;
+    cout << "Enter Book ID to issue: ";
+    cin >> bookId;
+    cout << "Enter Customer ID: ";
+    cin >> customerId;
+    cout << "Enter Time Limit (in days): ";
+    cin >> days;
+
+    Node *ptr = head, *prev = NULL;
+    while (ptr != NULL) {
+        if (ptr->id == bookId) {
+            // Book found
+            cout << "Issuing book:" << endl;
+            cout << "Book ID: " << ptr->id << endl;
+            cout << "Author: " << ptr->author << endl;
+            cout << "Title: " << ptr->title << endl;
+            cout << "Publisher: " << ptr->publisher << endl;
+
+            // Calculate return date
+            time_t now = time(0);
+            time_t returnDate = now + days * 86400; // 86400 seconds per day
+
+            // Add to issuedBooks map
+            issuedBooks[bookId] = {customerId, returnDate};
+
+            // Delete book from library
+            if (ptr == head) {
+                head = head->next_add;
+            } else {
+                prev->next_add = ptr->next_add;
+            }
+            delete ptr;
+
+            cout << "Book issued successfully!\n";
+            return;
+        }
+        prev = ptr;
+        ptr = ptr->next_add;
+    }
+
+    cout << "Book with ID " << bookId << " not found!" << endl;
+}
+
+void LibraryManagementSystem::showIssuedBooks() {
+    header();
+    if (issuedBooks.empty()) {
+        cout << "\n\nNo books have been issued.";
+        return;
+    }
+
+    cout << "Issued Books:\n";
+    for (const auto& issuedBook : issuedBooks) {
+        int bookId = issuedBook.first;
+        string customerId = issuedBook.second.first;
+        time_t returnDate = issuedBook.second.second;
+
+        // Convert return date to readable format
+        char returnDateStr[20];
+        strftime(returnDateStr, sizeof(returnDateStr), "%Y-%m-%d", localtime(&returnDate));
+
+        cout << "Book ID: " << bookId << endl;
+        cout << "Customer ID: " << customerId << endl;
+        cout << "Return Date: " << returnDateStr << endl;
+        cout << "------------------------------------------" << endl;
+    }
 }
 
 void LibraryManagementSystem::menu() {
@@ -37,8 +120,10 @@ void LibraryManagementSystem::menu() {
         cout << "\n\n\t\t2. Search Record";
         cout << "\n\n\t\t3. Update Record";
         cout << "\n\n\t\t4. Delete Record";
-        cout << "\n\n\t\t5. Show all Record";
-        cout << "\n\n\t\t6. Exit";
+        cout << "\n\n\t\t5. Issue Book";
+        cout << "\n\n\t\t6. Show all Record";
+        cout << "\n\n\t\t7. Show issued Books";
+        cout << "\n\n\t\t8. Exit";
         cout << "\n\n\t\tEnter Your Choice: ";
 
         int choice;
@@ -67,13 +152,19 @@ void LibraryManagementSystem::menu() {
                 break;
 
             case 5:
+                issueBook();
+                break;
+            
+            case 6:
                 sortBooks();
                 // head = NULL;
                 // loadData();
                 showBooks();
                 break;
-            
-            case 6:
+            case 7:
+               showIssuedBooks();
+               break;
+            case 8:
                 exit(0);  // Exit the program
 
             default:
@@ -87,30 +178,30 @@ void LibraryManagementSystem::menu() {
 }
 
 void LibraryManagementSystem::insert() {
-   
-        header();
-        Node *newNode = new Node;
-        cout<<"Book ID: ";
-        cin>>newNode ->id;
-        cout<<"Author: ";
-        cin>>newNode ->author;
-        cout<<"Title: ";
-        cin>>newNode ->title;
-        cout<<"Publisher: ";
-        cin>>newNode ->publisher;
-        newNode ->next_add = NULL;
+    header();
+    Node *newNode = new Node;
+    
+    newNode->id = nextBookId++;  // Set unique ID and increment for next book
+    cout << "Assigned Book ID: " << newNode->id << endl;
 
-        if(head == NULL){
-            head = newNode;
+    cout << "Author: ";
+    cin >> newNode->author;
+    cout << "Title: ";
+    cin >> newNode->title;
+    cout << "Publisher: ";
+    cin >> newNode->publisher;
+    newNode->next_add = NULL;
+
+    if (head == NULL) {
+        head = newNode;
+    } else {
+        Node *ptr = head;
+        while (ptr->next_add != NULL) {
+            ptr = ptr->next_add;
         }
-        else{
-            Node *ptr = head;
-            while(ptr->next_add != NULL){
-                ptr = ptr ->next_add;
-            }
-            ptr->next_add = newNode;
-        }
-        cout<<"\n\n\t\t\tNew Book inserted succesfully!";
+        ptr->next_add = newNode;
+    }
+    cout << "\n\n\t\t\tNew Book inserted successfully!";
 }
 void LibraryManagementSystem::search() {
 
